@@ -2,7 +2,6 @@ const EMAIL = require("../modals/emailModel");
 //create product -- admin
 
 exports.createEmail = async (req, res) => {
-  console.log(req.body);
   try {
     const newEmail = await EMAIL.create(req.body);
 

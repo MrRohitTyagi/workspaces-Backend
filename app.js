@@ -13,5 +13,8 @@ const email = require("./Routes/emailRoutes.js");
 
 app.use("/api/v1/user", user);
 app.use("/api/v1/email", email);
+app.get("/api/v1/email/getall", (req, res) => {
+  res.send({ success: true });
+});
 
 module.exports = app;
