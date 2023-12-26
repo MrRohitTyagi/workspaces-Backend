@@ -19,8 +19,7 @@ exports.createEmail = async (req, res) => {
 };
 exports.deleteEmail = async (req, res) => {
   const id = req.params.id;
-  const emailToRemove = req.params.email;
-  console.log({ id, emailToRemove });
+  const emailToRemove = req?.params?.email;
   try {
     const newEmail = await EMAIL.findByIdAndUpdate(
       id,

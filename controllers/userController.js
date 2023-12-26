@@ -4,7 +4,6 @@ const EMAIL = require("../modals/emailModel");
 
 exports.configureUser = async (req, res) => {
   const { name, email } = req.body || {};
-  console.log({ name, email });
   try {
     let user;
     let isNew = false;
