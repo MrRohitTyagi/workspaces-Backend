@@ -11,13 +11,13 @@ const EmailSchema = new mongoose.Schema({
   },
   subject: { type: String, required: true },
   body: { type: String, required: true },
-  isStarred: {
-    type: Object,
-    default: {},
+  starredBy: {
+    type: Array,
+    require: true,
   },
-  isArchived: {
-    type: Object,
-    default: {},
+  archivedBy: {
+    type: Array,
+    require: true,
   },
 });
 

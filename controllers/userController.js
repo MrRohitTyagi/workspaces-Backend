@@ -20,7 +20,7 @@ exports.configureUser = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      response: { _id: user._id, emailContent: emails || [] },
+      response: { _id: user._id, emailContent: (emails || []).reverse() },
     });
   } catch (error) {
     console.log(error);
