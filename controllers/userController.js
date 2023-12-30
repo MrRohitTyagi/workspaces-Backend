@@ -1,15 +1,15 @@
 const USER = require("../modals/userModal");
 const EMAIL = require("../modals/emailModel");
 const { setUserSocketID } = require("../config/globalState");
-const { io } = require("../app");
-//create product -- admin
+// const { io } = require("../app");
 
 exports.configureUser = async (req, res) => {
   const { name, email } = req.body || {};
   const socketId = req.get("Socket_id");
-  // io.to(socketId).emit("NEW_EMAIL_RECEIVED");
 
   try {
+    // io.to(socketId).emit("NEW_EMAIL_RECEIVED", { new: true });
+
     setUserSocketID(email, socketId);
     let user;
     let isNew = false;

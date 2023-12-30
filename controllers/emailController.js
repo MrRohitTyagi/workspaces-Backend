@@ -8,7 +8,10 @@ exports.createEmail = async (req, res) => {
 
     for (const reci of newEmail.recipients) {
       const userSocketId = getUserSocketId(reci);
-      // io.to(userSocketId).emit("NEW_EMAIL_RECEIVED", newEmail);
+      io.to(userSocketId).emit("NEW_EMAIL_RECEIVED", {
+        ...newEmail._doc,
+        isUnread: true,
+      });
     }
 
     res.status(200).json({
