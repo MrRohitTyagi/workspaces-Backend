@@ -19,6 +19,11 @@ const EmailSchema = new mongoose.Schema({
     type: Array,
     require: true,
   },
+  timestamp: { type: Date, default: Date.now },
+  deletedBySender: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 module.exports = mongoose.model("Email", EmailSchema);

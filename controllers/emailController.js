@@ -82,7 +82,7 @@ exports.deleteEmailSent = async (req, res) => {
   try {
     const newEmail = await EMAIL.findByIdAndUpdate(
       id,
-      { sender: "EMPTY" },
+      { deletedBySender: true },
       { new: true }
     );
 
@@ -92,6 +92,7 @@ exports.deleteEmailSent = async (req, res) => {
 
     res.status(200).json({
       success: true,
+      response: newEmail,
     });
   } catch (error) {
     console.log(error);

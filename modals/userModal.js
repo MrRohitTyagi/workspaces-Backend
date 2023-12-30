@@ -9,10 +9,6 @@ const userSchema = new mongoose.Schema({
     type: String,
     trim: true,
   },
-  emailContent: {
-    type: Array,
-    default: [],
-  },
 
   createdAT: {
     type: Date,
