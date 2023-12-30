@@ -26,6 +26,7 @@ exports.createEmail = async (req, res) => {
     });
   }
 };
+
 exports.deleteEmail = async (req, res) => {
   const id = req.params.id;
   const emailToRemove = req?.params?.email;
@@ -33,15 +34,18 @@ exports.deleteEmail = async (req, res) => {
     const newEmail = await EMAIL.findByIdAndUpdate(
       id,
       {
-        $pull: { recipients: emailToRemove },
-        $pull: { starredBy: emailToRemove },
-        $pull: { archivedBy: emailToRemove },
+        $pull: {
+          recipients: emailToRemove,
+          starredBy: emailToRemove,
+          archivedBy: emailToRemove,
+        },
       },
       { new: true }
     );
 
     res.status(200).json({
       success: true,
+      response: newEmail,
     });
   } catch (error) {
     console.log(error);
@@ -51,6 +55,7 @@ exports.deleteEmail = async (req, res) => {
     });
   }
 };
+
 exports.updateEmail = async (req, res) => {
   console.log("req.body", req.body);
   const { updateingKey, _id, ...rest } = req.body;
