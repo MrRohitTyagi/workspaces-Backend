@@ -1,9 +1,8 @@
-const app = require("./app");
-const dotenv = require("dotenv");
+const { httpServer } = require("./app");
 const connectDatabase = require("./config/database");
 //connect database
 connectDatabase();
 
-app.listen(4000, () => {
+httpServer.listen(4000, () => {
   console.log(`server is running at  http://localhost:${4000}`);
 });

@@ -1,9 +1,15 @@
 const EMAIL = require("../modals/emailModel");
-//create product -- admin
+const { getUserSocketId } = require("../config/globalState");
+const { io } = require("../app");
 
 exports.createEmail = async (req, res) => {
   try {
     const newEmail = await EMAIL.create(req.body);
+
+    for (const reci of newEmail.recipients) {
+      const userSocketId = getUserSocketId(reci);
+      // io.to(userSocketId).emit("NEW_EMAIL_RECEIVED", newEmail);
+    }
 
     res.status(200).json({
       success: true,
