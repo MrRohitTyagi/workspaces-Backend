@@ -57,7 +57,6 @@ exports.deleteEmail = async (req, res) => {
 };
 
 exports.updateEmail = async (req, res) => {
-  console.log("req.body", req.body);
   const { updateingKey, _id, ...rest } = req.body;
   try {
     const newEmail = await EMAIL.findByIdAndUpdate(
@@ -68,6 +67,22 @@ exports.updateEmail = async (req, res) => {
     res.status(200).json({
       success: true,
       response: newEmail,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+    });
+  }
+};
+exports.getSingleEmail = async (req, res) => {
+  const id = req.params.id;
+  try {
+    const email = await EMAIL.findById(id);
+    res.status(200).json({
+      success: true,
+      response: email,
     });
   } catch (error) {
     console.log(error);
