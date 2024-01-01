@@ -142,7 +142,6 @@ exports.getUser = async (req, res) => {
         break;
       case "GOOGLE_LOGIN":
         const response = await USER.findOne({ email, password });
-        console.log("response", response);
         if (!response?._id) {
           user = await USER.create({ email, password, username, picture });
         } else user = response;
