@@ -124,7 +124,7 @@ exports.createUser = async (req, res) => {
 };
 exports.getUser = async (req, res) => {
   try {
-    const { id, email, password, type, username } = req.body;
+    const { id, email, password, type, username, picture } = req.body;
     let user = {};
     switch (type) {
       case "AUTHORIZE":
@@ -139,6 +139,13 @@ exports.getUser = async (req, res) => {
         break;
       case "SIGN-UP":
         user = await USER.create({ email, password, username });
+        break;
+      case "GOOGLE_LOGIN":
+        const response = await USER.findOne({ email, password });
+        console.log("response", response);
+        if (!response?._id) {
+          user = await USER.create({ email, password, username, picture });
+        } else user = response;
         break;
       default:
         break;
