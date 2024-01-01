@@ -1,4 +1,5 @@
 const EMAIL = require("../modals/emailModel");
+const USER = require("../modals/userModal");
 const { getUserSocketId } = require("../config/globalState");
 const { io } = require("../app");
 
@@ -111,6 +112,25 @@ exports.deleteEmailSent = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+    });
+  }
+};
+exports.searchEmails = async (req, res) => {
+  const query = req.query.search;
+  try {
+    const foundEmails = await USER.find({
+      email: { $regex: new RegExp(query, "i") },
+    }).select("email");
+
+    res.status(200).json({
+      success: true,
+      response: foundEmails,
+    });
+  } catch (error) {
+    console.error(error);
     res.status(500).json({
       success: false,
       message: "Something went wrong",
