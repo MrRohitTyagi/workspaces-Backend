@@ -132,18 +132,30 @@ exports.getUser = async (req, res) => {
           user = {};
           break;
         }
-        user = await USER.findById(id);
+        user = await USER.findById(id).select("-password");
         break;
       case "SIGN-IN":
         user = await USER.findOne({ email, password });
         break;
+      case "GET-BY-EMAIL":
+        user = await USER.findOne({ email }).select("-password");
+        break;
       case "SIGN-UP":
-        user = await USER.create({ email, password, username });
+        user = await USER.create({ email, password, username }).select(
+          "-password"
+        );
         break;
       case "GOOGLE_LOGIN":
-        const response = await USER.findOne({ email, password });
+        const response = await USER.findOne({ email, password }).select(
+          "-password"
+        );
         if (!response?._id) {
-          user = await USER.create({ email, password, username, picture });
+          user = await USER.create({
+            email,
+            password,
+            username,
+            picture,
+          }).select("-password");
         } else user = response;
         break;
       default:
