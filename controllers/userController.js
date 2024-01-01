@@ -2,47 +2,6 @@ const USER = require("../modals/userModal");
 const EMAIL = require("../modals/emailModel");
 const { setUserSocketID } = require("../config/globalState");
 
-exports.configureUser = async (req, res) => {
-  const { name, email, globalQuery } = req.body || {};
-  const socketId = req.get("Socket_id");
-  const filterkey = req.get("Filterkey");
-  try {
-    setUserSocketID(email, socketId);
-    let user;
-    let isNew = false;
-
-    user = await USER.findOne({ email: email });
-    if (!user) {
-      isNew = true;
-      user = await USER.create({ name, email });
-    }
-
-    const emails = await EMAIL.find({
-      $or: [{ sender: email }, { recipients: email }],
-    });
-
-    const filteredEmails = filterEmailAccordingToFilterkey(
-      emails,
-      filterkey,
-      email,
-      globalQuery
-    );
-
-    res.status(200).json({
-      success: true,
-      response: {
-        _id: user._id,
-        emailContent: (filteredEmails || []).reverse(),
-      },
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      success: false,
-      message: "Something went wrong",
-    });
-  }
-};
 const messages = {
   SHOW_ALL_INBOX: "SHOW_ALL_INBOX",
   SHOW_ALL_STARRED: "SHOW_ALL_STARRED",
@@ -50,7 +9,6 @@ const messages = {
   SHOW_ALL_ARCHIVED: "SHOW_ALL_ARCHIVED",
   GLOBAL_SEARCH_QUERY: "GLOBAL_SEARCH_QUERY",
 };
-
 const filterEmailAccordingToFilterkey = (
   allEmails,
   filterkey,
@@ -104,5 +62,96 @@ const filterEmailAccordingToFilterkey = (
 
     default:
       return emails;
+  }
+};
+exports.configureUser = async (req, res) => {
+  const { name, email, globalQuery } = req.body || {};
+  const socketId = req.get("Socket_id");
+  const filterkey = req.get("Filterkey");
+  try {
+    setUserSocketID(email, socketId);
+    let user;
+    let isNew = false;
+
+    user = await USER.findOne({ email: email });
+    if (!user) {
+      isNew = true;
+      user = await USER.create({ name, email });
+    }
+
+    const emails = await EMAIL.find({
+      $or: [{ sender: email }, { recipients: email }],
+    });
+
+    const filteredEmails = filterEmailAccordingToFilterkey(
+      emails,
+      filterkey,
+      email,
+      globalQuery
+    );
+
+    res.status(200).json({
+      success: true,
+      response: {
+        _id: user._id,
+        emailContent: (filteredEmails || []).reverse(),
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+    });
+  }
+};
+
+exports.createUser = async (req, res) => {
+  try {
+    const user = req.body;
+    const newUser = await USER.create(user);
+    res.status(200).json({
+      success: true,
+      response: newUser,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+    });
+  }
+};
+exports.getUser = async (req, res) => {
+  try {
+    const { id, email, password, type, username } = req.body;
+    let user = {};
+    switch (type) {
+      case "AUTHORIZE":
+        if (id === "NONE") {
+          user = {};
+          break;
+        }
+        user = await USER.findById(id);
+        break;
+      case "SIGN-IN":
+        user = await USER.findOne({ email, password });
+        break;
+      case "SIGN-UP":
+        user = await USER.create({ email, password, username });
+        break;
+      default:
+        break;
+    }
+    res.status(200).json({
+      success: true,
+      response: user,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+    });
   }
 };

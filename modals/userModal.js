@@ -8,6 +8,16 @@ const userSchema = new mongoose.Schema({
   email: {
     type: String,
     trim: true,
+    unique: true,
+  },
+  password: {
+    type: String,
+    required: true,
+  },
+  picture: {
+    type: String,
+    default:
+      "https://res.cloudinary.com/derplm8c6/image/upload/v1690776482/vgonkn7ij7qlnskkldpp.png",
   },
 
   createdAT: {
