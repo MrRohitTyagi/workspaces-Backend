@@ -24,6 +24,10 @@ const EmailSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  attachments: {
+    type: Array,
+    default: [],
+  },
 });
 
 module.exports = mongoose.model("Email", EmailSchema);
