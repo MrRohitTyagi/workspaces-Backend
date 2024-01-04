@@ -135,7 +135,8 @@ exports.getUser = async (req, res) => {
         user = await USER.findById(id).select("-password");
         break;
       case "SIGN-IN":
-        user = await USER.findOne({ email, password });
+        // user = await USER.findOne({ email, password });
+        user = await USER.findByCredentials(email, password);
         break;
       case "GET-BY-EMAIL":
         user = await USER.findOne({ email }).select("-password");
@@ -169,7 +170,7 @@ exports.getUser = async (req, res) => {
     console.log(error);
     res.status(500).json({
       success: false,
-      message: "Something went wrong",
+      message: error.message || "Something went wrong",
     });
   }
 };
