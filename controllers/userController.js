@@ -122,6 +122,30 @@ exports.createUser = async (req, res) => {
     });
   }
 };
+
+exports.updateUser = async (req, res) => {
+  try {
+    const { id, key, value } = req.body;
+
+    await USER.findByIdAndUpdate(
+      id,
+      {
+        [key]: value,
+      },
+      { new: "true" }
+    );
+
+    res.status(200).json({
+      success: true,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Something went wrong",
+    });
+  }
+};
 exports.getUser = async (req, res) => {
   try {
     const { id, email, password, type, username, picture } = req.body;

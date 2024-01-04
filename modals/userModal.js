@@ -20,6 +20,10 @@ const userSchema = new mongoose.Schema({
     default:
       "https://res.cloudinary.com/derplm8c6/image/upload/v1690776482/vgonkn7ij7qlnskkldpp.png",
   },
+  isDarkTheme: {
+    type: Boolean,
+    default: false,
+  },
 
   createdAT: {
     type: Date,
