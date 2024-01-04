@@ -2,6 +2,13 @@ const EMAIL = require("../modals/emailModel");
 const USER = require("../modals/userModal");
 const { getUserSocketId } = require("../config/globalState");
 const { io } = require("../app");
+const cloudinary = require("cloudinary").v2;
+const config = {
+  cloud_name: process.env.CLOUDNERY_CLOUD_NAME,
+  api_key: process.env.CLOUDNERY_API_KEY,
+  api_secret: process.env.CLOUDNERY_API_SECRET,
+};
+cloudinary.config(config);
 
 exports.createEmail = async (req, res) => {
   try {
@@ -43,6 +50,10 @@ exports.deleteEmail = async (req, res) => {
       },
       { new: true }
     );
+
+    if (newEmail.deletedBySender && newEmail.recipients.length === 0) {
+      deleteEmailCompleteley(newEmail._id);
+    }
 
     res.status(200).json({
       success: true,
@@ -101,9 +112,8 @@ exports.deleteEmailSent = async (req, res) => {
       { deletedBySender: true },
       { new: true }
     );
-
     if (newEmail.recipients.length === 0) {
-      await EMAIL.findByIdAndDelete(newEmail._id);
+      deleteEmailCompleteley(newEmail._id);
     }
 
     res.status(200).json({
@@ -137,3 +147,24 @@ exports.searchEmails = async (req, res) => {
     });
   }
 };
+
+async function deleteEmailCompleteley(_id) {
+  const email = await EMAIL.findByIdAndDelete(_id);
+  // const email = await EMAIL.findById(_id);
+  console.log("email", email);
+  for (const imageUrl of email.attachments) {
+    const public_id = imageUrl.match(/\/([^/]+)\.[a-z]+$/)?.[1];
+    if (!public_id) continue;
+
+    cloudinary.uploader.destroy(public_id, (error, result) => {
+      if (error) {
+        console.error(error);
+      } else {
+        console.log(result);
+        console.log(
+          `Image with public_id ${public_id} has been deleted from Cloudinary.`
+        );
+      }
+    });
+  }
+}
