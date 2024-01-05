@@ -29,9 +29,11 @@ module.exports = { httpServer, io };
 
 const user = require("./Routes/userRoute.js");
 const email = require("./Routes/emailRoutes.js");
+const chat = require("./Routes/chatRoutes.js");
 
 app.use("/api/v1/user", user);
 app.use("/api/v1/email", email);
+app.use("/api/v1/chat", chat);
 
 app.use("/api/v1/getting-started", (req, res) => {
   res.send({ success: true });
