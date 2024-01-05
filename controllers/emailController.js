@@ -3,6 +3,7 @@ const USER = require("../modals/userModal");
 const { getUserSocketId } = require("../config/globalState");
 const { io } = require("../app");
 const cloudinary = require("cloudinary").v2;
+
 const config = {
   cloud_name: process.env.CLOUDNERY_CLOUD_NAME,
   api_key: process.env.CLOUDNERY_API_KEY,
@@ -133,7 +134,7 @@ exports.searchEmails = async (req, res) => {
   try {
     const foundEmails = await USER.find({
       email: { $regex: new RegExp(query, "i") },
-    }).select("email");
+    }).select("-password");
 
     res.status(200).json({
       success: true,

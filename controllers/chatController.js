@@ -1,4 +1,6 @@
 const Message = require("../modals/chatModel");
+const { io } = require("../app");
+const { getUserSocketId } = require("../config/globalState");
 
 exports.newChat = async (req, res) => {
   try {
@@ -10,8 +12,12 @@ exports.newChat = async (req, res) => {
     });
 
     await newMessage.save();
-
-    res.status(200).json({ success: true });
+    console.log("newMessage", newMessage);
+    await newMessage.populate({
+      path: "to from",
+      select: "-password",
+    });
+    res.status(200).json({ success: true, response: newMessage });
   } catch (error) {
     console.log(error);
     res.status(500).json({
@@ -48,11 +54,22 @@ exports.saveMessages = async (req, res) => {
   try {
     const { msgId, message } = req.body;
 
-    let messageDoc = await Message.findById(msgId);
+    let messageDoc = await Message.findById(msgId).populate({
+      path: "to from",
+      select: "-password",
+    });
     messageDoc.messages.push(message);
     await messageDoc.save();
 
-    console.log("Message appended successfully!");
+    const userSocketId = getUserSocketId(messageDoc.to.email);
+
+    console.log("userSocketId THIS", userSocketId);
+    console.log(messageDoc);
+
+    // io.to(userSocketId).emit("NEW_MESSAGE_RECEIVED", {
+    //   message_id: messageDoc._id,
+    //   message,
+    // });
     res.status(200).json({
       success: true,
     });
