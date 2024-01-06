@@ -11,6 +11,8 @@ app.use(express.json());
 app.use(cors({ origin: true, methods: "GET,HEAD,PUT,PATCH,POST,DELETE" }));
 app.options("*", cors());
 
+var console = require("better-console");
+
 const httpServer = createServer(app);
 const io = new Server(httpServer);
 
@@ -19,8 +21,12 @@ io.on("connection", (socket) => {
   io.to(socket.id).emit("CONNECTED", socket.id);
 
   // Handle disconnection
-  socket.on("disconnect", () => {
-    console.log("User disconnected");
+  socket.on("disconnect", (id) => {
+    console.log("User disconnected",socket.id);
+  });
+  socket.on("SAVE_SOCKET_ID", (id) => {
+    console.info("id", id, socket.id);
+    if (id) setUserSocketID(id, socket.id);
   });
 });
 
@@ -30,6 +36,7 @@ module.exports = { httpServer, io };
 const user = require("./Routes/userRoute.js");
 const email = require("./Routes/emailRoutes.js");
 const chat = require("./Routes/chatRoutes.js");
+const { setUserSocketID } = require("./config/globalState.js");
 
 app.use("/api/v1/user", user);
 app.use("/api/v1/email", email);

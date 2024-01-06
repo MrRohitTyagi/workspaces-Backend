@@ -52,7 +52,7 @@ exports.getAllChatsPeruser = async (req, res) => {
 };
 exports.saveMessages = async (req, res) => {
   try {
-    const { msgId, message } = req.body;
+    const { msgId, message, to } = req.body;
 
     let messageDoc = await Message.findById(msgId).populate({
       path: "to from",
@@ -61,15 +61,14 @@ exports.saveMessages = async (req, res) => {
     messageDoc.messages.push(message);
     await messageDoc.save();
 
-    const userSocketId = getUserSocketId(messageDoc.to.email);
+    const userSocketId = getUserSocketId(to);
 
     console.log("userSocketId THIS", userSocketId);
-    console.log(messageDoc);
 
-    // io.to(userSocketId).emit("NEW_MESSAGE_RECEIVED", {
-    //   message_id: messageDoc._id,
-    //   message,
-    // });
+    io.to(userSocketId).emit("NEW_MESSAGE_RECEIVED", {
+      message_id: messageDoc._id,
+      message,
+    });
     res.status(200).json({
       success: true,
     });

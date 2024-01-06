@@ -1,11 +1,12 @@
 let globalVariable = {};
 
-function getUserSocketId(email) {
-  return globalVariable[email];
+function getUserSocketId(key) {
+  return globalVariable[key];
 }
 
-function setUserSocketID(email, id) {
-  globalVariable[email] = id;
+function setUserSocketID(key, id) {
+  globalVariable[key] = id;
+  console.table(globalVariable);
 }
 function getGlobalObj() {
   return globalVariable;

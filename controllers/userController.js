@@ -66,10 +66,10 @@ const filterEmailAccordingToFilterkey = (
 };
 exports.configureUser = async (req, res) => {
   const { name, email, globalQuery } = req.body || {};
-  const socketId = req.get("Socket_id");
+  // const socketId = req.get("Socket_id");
   const filterkey = req.get("Filterkey");
   try {
-    setUserSocketID(email, socketId);
+    // setUserSocketID(email, socketId);
     let user;
     let isNew = false;
 
@@ -171,7 +171,7 @@ exports.getUser = async (req, res) => {
         );
         break;
       case "GOOGLE_LOGIN":
-        const response = await USER.findOne({ email, password }).select(
+        const response = await USER.findOne({ email })?.select(
           "-password"
         );
         if (!response?._id) {
