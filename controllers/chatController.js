@@ -52,13 +52,14 @@ exports.getAllChatsPeruser = async (req, res) => {
 };
 exports.saveMessages = async (req, res) => {
   try {
-    const { msgId, message, to } = req.body;
+    const { message_id, message, to } = req.body;
 
-    let messageDoc = await Message.findById(msgId).populate({
+    let messageDoc = await Message.findById(message_id).populate({
       path: "to from",
       select: "-password",
     });
-    messageDoc.messages.push(message);
+    const newMessage = { ...message, timestamp: new Date().getTime() };
+    messageDoc.messages.push(newMessage);
     await messageDoc.save();
 
     const userSocketId = getUserSocketId(to);
@@ -67,11 +68,27 @@ exports.saveMessages = async (req, res) => {
 
     io.to(userSocketId).emit("NEW_MESSAGE_RECEIVED", {
       message_id: messageDoc._id,
-      message,
+      message: newMessage,
     });
     res.status(200).json({
       success: true,
     });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+    });
+  }
+};
+exports.getUserChat = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const chat = await Message.findById(id).populate({
+      path: "to from",
+      select: "-password",
+    });
+    res.status(200).json({ success: true, response: chat });
   } catch (error) {
     console.log(error);
     res.status(500).json({
