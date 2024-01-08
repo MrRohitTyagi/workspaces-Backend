@@ -1,6 +1,7 @@
 const Message = require("../modals/chatModel");
 const { io } = require("../app");
 const { getUserSocketId } = require("../config/globalState");
+const { info } = require("better-console");
 
 exports.newChat = async (req, res) => {
   try {
@@ -64,8 +65,6 @@ exports.saveMessages = async (req, res) => {
 
     const userSocketId = getUserSocketId(to);
 
-    console.log("userSocketId THIS", userSocketId);
-
     io.to(userSocketId).emit("NEW_MESSAGE_RECEIVED", {
       message_id: messageDoc._id,
       message: newMessage,
@@ -89,6 +88,29 @@ exports.getUserChat = async (req, res) => {
       select: "-password",
     });
     res.status(200).json({ success: true, response: chat });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+    });
+  }
+};
+exports.deleteSingleMessage = async (req, res) => {
+  const { chat_id, message_id, to } = req.body;
+  info({ chat_id, message_id,to });
+  try {
+    const chat = await Message.findById(chat_id);
+    const messageindex = chat.messages.findIndex((m) => m._id === message_id);
+    chat.messages.splice(messageindex, 1);
+    await chat.save();
+
+    const userSocketId = getUserSocketId(to);
+    io.to(userSocketId).emit("DELETE_SINGLE_MESSAGE", {
+      message_id: message_id,
+      chat_id: chat_id,
+    });
+    res.status(200).json({ success: true });
   } catch (error) {
     console.log(error);
     res.status(500).json({

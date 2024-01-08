@@ -2,6 +2,7 @@ const EMAIL = require("../modals/emailModel");
 const USER = require("../modals/userModal");
 const { getUserSocketId } = require("../config/globalState");
 const { io } = require("../app");
+const { log, info } = require("better-console");
 const cloudinary = require("cloudinary").v2;
 
 const config = {
@@ -16,10 +17,12 @@ exports.createEmail = async (req, res) => {
     const newEmail = await EMAIL.create(req.body);
 
     for (const reci of newEmail.recipients) {
-      const userSocketId = getUserSocketId(reci);
-      io.to(userSocketId).emit("NEW_EMAIL_RECEIVED", {
-        ...newEmail._doc,
-        isUnread: true,
+      USER.findOne({ email: reci }).then((data) => {
+        const userSocketId = getUserSocketId(data._id);
+        io.to(userSocketId).emit("NEW_EMAIL_RECEIVED", {
+          ...newEmail._doc,
+          isUnread: true,
+        });
       });
     }
 
