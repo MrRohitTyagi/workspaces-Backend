@@ -98,7 +98,7 @@ exports.getUserChat = async (req, res) => {
 };
 exports.deleteSingleMessage = async (req, res) => {
   const { chat_id, message_id, to } = req.body;
-  info({ chat_id, message_id,to });
+  info({ chat_id, message_id, to });
   try {
     const chat = await Message.findById(chat_id);
     const messageindex = chat.messages.findIndex((m) => m._id === message_id);
@@ -110,6 +110,40 @@ exports.deleteSingleMessage = async (req, res) => {
       message_id: message_id,
       chat_id: chat_id,
     });
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+    });
+  }
+};
+exports.saveEditedMessage = async (req, res) => {
+  const { chat_id, message_id, to, msg } = req.body;
+
+  try {
+    const chat = await Message.findById(chat_id);
+
+    const updatedMessages = chat.messages.map((m) => {
+      if (m._id === message_id) {
+        info({ chat_id, message_id, to, msg });
+        return { ...m, msg, edited: true };
+      } else return m;
+    });
+
+    chat.messages = updatedMessages;
+
+    await chat.save();
+
+    const userSocketId = getUserSocketId(to);
+
+    io.to(userSocketId).emit("EDITED_SINGLE_MESSAGE", {
+      message_id: message_id,
+      msg,
+      chat_id: chat_id,
+    });
+
     res.status(200).json({ success: true });
   } catch (error) {
     console.log(error);
