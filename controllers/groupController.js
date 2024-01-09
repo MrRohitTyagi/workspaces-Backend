@@ -2,9 +2,13 @@ const GROUP = require("../modals/groupModel");
 
 exports.createGroup = async (req, res) => {
   try {
-    const newgroup = await GROUP.create(req.body);
-    await newgroup.save();
-    res.status(200).send({ success: true, response: newgroup });
+    const newGroup = await GROUP.create(req.body);
+    const populatedGroup = await GROUP.findById(newGroup._id).populate({
+      path: "members",
+      select: "-password",
+    });
+
+    res.status(200).send({ success: true, response: populatedGroup });
   } catch (error) {
     console.log(error);
     res.status(500).json({
@@ -34,7 +38,10 @@ exports.getOneGroup = async (req, res) => {
 exports.getAllGroupsOfUser = async (req, res) => {
   try {
     const { id: user_id } = req.params;
-    const group = await GROUP.find({ members: { $in: [user_id] } });
+    const group = await GROUP.find({ members: { $in: [user_id] } }).populate({
+      path: "members",
+      select: "-password",
+    });
     res.status(200).send({ success: true, response: group });
   } catch (error) {
     console.log(error);
@@ -52,7 +59,7 @@ exports.saveGroupMessage = async (req, res) => {
     const group = await GROUP.findById(group_id);
     group.messages.push({ ...message, timestamp: new Date().getTime() });
     await group.save();
-    res.status(200).send({ success: true, response: group });
+    res.status(200).send({ success: true });
   } catch (error) {
     console.log(error);
     res.status(500).json({
