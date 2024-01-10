@@ -22,9 +22,11 @@ const groupsSchema = new mongoose.Schema({
     type: String,
   },
   admins: {
-    type: [mongoose.Schema.Types.ObjectId],
+    type: [],
     required: true,
-    ref: "user",
+  },
+  createdBy: {
+    type: String,
   },
   createdAT: {
     type: Date,

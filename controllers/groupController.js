@@ -1,5 +1,7 @@
+const { info } = require("better-console");
 const { io } = require("../app");
 const GROUP = require("../modals/groupModel");
+const { getUserSocketId } = require("../config/globalState");
 
 exports.createGroup = async (req, res) => {
   try {
@@ -8,7 +10,14 @@ exports.createGroup = async (req, res) => {
       path: "members",
       select: "-password",
     });
-
+    for (const member of newGroup.members) {
+      const user_socket =
+        member._id.toString() === newGroup.createdBy.toString()
+          ? null
+          : getUserSocketId(member._id);
+      if (user_socket)
+        io.to(user_socket).emit("U_GOT_ADDED_IN_A_GROUP", newGroup);
+    }
     res.status(200).send({ success: true, response: populatedGroup });
   } catch (error) {
     console.log(error);
@@ -49,6 +58,56 @@ exports.getOneGroup = async (req, res) => {
     });
   }
 };
+exports.updateOneGroup = async (req, res) => {
+  try {
+    const { type, group_id, member_id } = req.body;
+    const group = await GROUP.findById(group_id);
+    switch (type) {
+      case "MAKE_ADMIN":
+        group.admins.push(member_id);
+        break;
+      case "REVOKE_ADMIN":
+        group.admins = group.admins.filter((a) => {
+          info(a);
+          return a !== member_id;
+        });
+        break;
+      case "DELETE_GROUP":
+        const g = await GROUP.findByIdAndDelete(group_id);
+        handleDeleteGroup(g);
+        res.status(200).send({ success: true });
+        return;
+      case "REMOVE_MEMBER":
+        group.members = group.members.filter((m) => m !== member_id);
+        break;
+      case "ADD_MEMBER":
+        group.members.push(member_id);
+        break;
+      default:
+        break;
+    }
+
+    await group.save();
+    res.status(200).send({ success: true });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+    });
+  }
+};
+
+function handleDeleteGroup(group) {
+  info(group);
+  for (const member of group.members) {
+    const user_socket = getUserSocketId(member.toString());
+    if (user_socket)
+      io.to(user_socket).emit("GROUP_DELETED_BY_ADMIN", {
+        group_id: group._id,
+      });
+  }
+}
 
 exports.getAllGroupsOfUser = async (req, res) => {
   try {
