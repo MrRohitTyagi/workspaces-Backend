@@ -8,6 +8,7 @@ const groupsSchema = new mongoose.Schema({
   members: {
     type: [mongoose.Schema.Types.ObjectId],
     required: true,
+    ref: "user",
   },
   title: {
     type: String,
@@ -22,7 +23,7 @@ const groupsSchema = new mongoose.Schema({
   },
   admins: {
     type: [mongoose.Schema.Types.ObjectId],
-    default: [],
+    required: true,
     ref: "user",
   },
   createdAT: {
