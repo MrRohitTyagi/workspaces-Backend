@@ -8,7 +8,6 @@ const groupsSchema = new mongoose.Schema({
   members: {
     type: [mongoose.Schema.Types.ObjectId],
     required: true,
-    ref: "user",
   },
   title: {
     type: String,
@@ -20,6 +19,11 @@ const groupsSchema = new mongoose.Schema({
   },
   picture: {
     type: String,
+  },
+  admins: {
+    type: [mongoose.Schema.Types.ObjectId],
+    default: [],
+    ref: "user",
   },
   createdAT: {
     type: Date,

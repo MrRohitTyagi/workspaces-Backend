@@ -1,3 +1,4 @@
+const { io } = require("../app");
 const GROUP = require("../modals/groupModel");
 
 exports.createGroup = async (req, res) => {
@@ -9,6 +10,20 @@ exports.createGroup = async (req, res) => {
     });
 
     res.status(200).send({ success: true, response: populatedGroup });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+    });
+  }
+};
+
+exports.deleteGroup = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await GROUP.findByIdAndDelete(id);
+    res.status(200).send({ success: true });
   } catch (error) {
     console.log(error);
     res.status(500).json({
@@ -59,6 +74,7 @@ exports.saveGroupMessage = async (req, res) => {
     const group = await GROUP.findById(group_id);
     group.messages.push({ ...message, timestamp: new Date().getTime() });
     await group.save();
+    io.to(group_id).emit("NEW_GROUP_MESSAGE", { group_id, message });
     res.status(200).send({ success: true });
   } catch (error) {
     console.log(error);

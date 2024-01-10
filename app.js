@@ -17,10 +17,8 @@ const httpServer = createServer(app);
 const io = new Server(httpServer);
 
 io.on("connection", (socket) => {
-  console.log("A user connected", socket.id);
+  // initial load config
   io.to(socket.id).emit("CONNECTED", socket.id);
-
-  // Handle disconnection
   socket.on("disconnect", (id) => {
     console.log("User disconnected", socket.id);
   });
@@ -28,6 +26,25 @@ io.on("connection", (socket) => {
     console.info("id", id, socket.id);
     if (id) setUserSocketID(id, socket.id);
   });
+
+  // group  sockets
+  socket.on("JOIN_ROOM", (room) => {
+    socket.join(room);
+    console.log(`User joined room: ${room}`);
+  });
+
+  socket.on("LEAVE_ROOM", (room) => {
+    socket.leave(room);
+    console.log(`User Left room: ${room}`);
+  });
+  socket.on("GROUP_USER_TYPING", ({ typing_by, group_id }) => {
+    io.to(group_id).emit("SHOW_GROUP_TYPING_EFFECT", {
+      group_id,
+      typing_by,
+    });
+  });
+
+  // chat sockets
   socket.on("USER_TYPING", ({ chattingTo, chat_id }) => {
     const chatting_with_socket_id = getUserSocketId(chattingTo);
     io.to(chatting_with_socket_id).emit("SHOW_TYPING_EFFECT", {
