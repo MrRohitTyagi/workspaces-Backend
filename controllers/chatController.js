@@ -13,7 +13,6 @@ exports.newChat = async (req, res) => {
     });
 
     await newMessage.save();
-    console.log("newMessage", newMessage);
     await newMessage.populate({
       path: "to from",
       select: "-password",

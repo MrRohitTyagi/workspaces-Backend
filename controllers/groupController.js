@@ -60,7 +60,7 @@ exports.getOneGroup = async (req, res) => {
 };
 exports.updateOneGroup = async (req, res) => {
   try {
-    const { type, group_id, member_id } = req.body;
+    const { type, group_id, member_id, newMembers } = req.body;
     const group = await GROUP.findById(group_id);
     switch (type) {
       case "MAKE_ADMIN":
@@ -68,7 +68,6 @@ exports.updateOneGroup = async (req, res) => {
         break;
       case "REVOKE_ADMIN":
         group.admins = group.admins.filter((a) => {
-          info(a);
           return a !== member_id;
         });
         break;
@@ -77,18 +76,24 @@ exports.updateOneGroup = async (req, res) => {
         handleDeleteGroup(g);
         res.status(200).send({ success: true });
         return;
+
       case "REMOVE_MEMBER":
-        group.members = group.members.filter((m) => m !== member_id);
+        group.members = group.members.filter((m) => m.toString() !== member_id);
         break;
-      case "ADD_MEMBER":
-        group.members.push(member_id);
+      case "LEAVE_GROUP":
+        group.members = group.members.filter((m) => m.toString() !== member_id);
         break;
+      case "ADD_MEMBERS":
+        group.members = Array.from(new Set(group.members.concat(newMembers)));
+        break;
+
       default:
         break;
     }
 
     await group.save();
-    res.status(200).send({ success: true });
+    if (group.members.length === 0) GROUP.findByIdAndDelete(group._id);
+    res.status(200).send({ success: true, group });
   } catch (error) {
     console.log(error);
     res.status(500).json({
