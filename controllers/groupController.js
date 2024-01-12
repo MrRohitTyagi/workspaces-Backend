@@ -93,6 +93,15 @@ exports.updateOneGroup = async (req, res) => {
         break;
       case "ADD_MEMBERS":
         group.members = Array.from(new Set(group.members.concat(newMembers)));
+        const populatedGroup = group.populate({
+          path: "members",
+          select: "-password",
+        });
+        // for (const member of newMembers) {
+        //   const user_socket = getUserSocketId(member);
+        //   if (user_socket)
+        //     io.to(user_socket).emit("U_GOT_ADDED_IN_A_GROUP", populatedGroup);
+        // }
         break;
 
       default:
