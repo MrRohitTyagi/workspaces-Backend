@@ -81,6 +81,9 @@ exports.configureUser = async (req, res) => {
 
     const emails = await EMAIL.find({
       $or: [{ sender: email }, { recipients: email }],
+    }).populate({
+      path: "sender",
+      select: "-password -isDarkTheme -createdAT -__v",
     });
 
     const filteredEmails = filterEmailAccordingToFilterkey(
@@ -166,26 +169,26 @@ exports.getUser = async (req, res) => {
         user = await USER.findOne({ email }).select("-password");
         break;
       case "SIGN-UP":
-        user = await USER.create({ email, password, username }).select(
-          "-password"
-        );
+        user = (await USER.create({ email, password, username })).toObject();
         break;
       case "GOOGLE_LOGIN":
-        const response = await USER.findOne({ email })?.select(
-          "-password"
-        );
+        const response = await USER.findOne({ email })?.select("-password");
         if (!response?._id) {
-          user = await USER.create({
-            email,
-            password,
-            username,
-            picture,
-          }).select("-password");
+          user = (
+            await USER.create({
+              email,
+              password,
+              username,
+              picture,
+            })
+          ).toObject();
         } else user = response;
         break;
       default:
         break;
     }
+    if (user?.password) delete user.password;
+
     res.status(200).json({
       success: true,
       response: user,

@@ -4,6 +4,7 @@ const EmailSchema = new mongoose.Schema({
   sender: {
     type: String,
     required: true,
+    ref: "user",
   },
   recipients: {
     type: Array,

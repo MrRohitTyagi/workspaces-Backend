@@ -2,7 +2,6 @@ const EMAIL = require("../modals/emailModel");
 const USER = require("../modals/userModal");
 const { getUserSocketId } = require("../config/globalState");
 const { io } = require("../app");
-const { log, info } = require("better-console");
 const cloudinary = require("cloudinary").v2;
 
 const config = {
@@ -15,6 +14,9 @@ cloudinary.config(config);
 exports.createEmail = async (req, res) => {
   try {
     const newEmail = await EMAIL.create(req.body);
+    const senderUser = await USER.findById(newEmail.sender).select(
+      "-password -isDarkTheme -createdAT -__v"
+    );
 
     for (const reci of newEmail.recipients) {
       USER.findOne({ email: reci }).then((data) => {
@@ -22,6 +24,7 @@ exports.createEmail = async (req, res) => {
         io.to(userSocketId).emit("NEW_EMAIL_RECEIVED", {
           ...newEmail._doc,
           isUnread: true,
+          sender: senderUser,
         });
       });
     }
