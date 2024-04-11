@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema({
   picture: {
     type: String,
     default:
-      "https://res.cloudinary.com/derplm8c6/image/upload/v1690776482/vgonkn7ij7qlnskkldpp.png",
+      "https://res.cloudinary.com/derplm8c6/image/upload/v1712828424/xjperceuyoyml44yqdyr.png",
   },
   isDarkTheme: {
     type: Boolean,

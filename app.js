@@ -17,6 +17,7 @@ const httpServer = createServer(app);
 const io = new Server(httpServer);
 
 io.on("connection", (socket) => {
+  console.log("socket.id", socket.id);
   // initial load config
   io.to(socket.id).emit("CONNECTED", socket.id);
   socket.on("disconnect", (id) => {
