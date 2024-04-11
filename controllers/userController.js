@@ -9,12 +9,12 @@ const messages = {
   SHOW_ALL_ARCHIVED: "SHOW_ALL_ARCHIVED",
   GLOBAL_SEARCH_QUERY: "GLOBAL_SEARCH_QUERY",
 };
-const filterEmailAccordingToFilterkey = (
-  allEmails,
-  filterkey,
-  userEmail,
-  globalQuery = ""
-) => {
+const filterEmailAccordingToFilterkey = ({
+  emails: allEmails,
+  filterkey: filterkey,
+  email: userEmail,
+  globalQuery: globalQuery = "",
+}) => {
   const emails = [];
 
   switch (filterkey) {
@@ -27,10 +27,17 @@ const filterEmailAccordingToFilterkey = (
       }
       return emails;
     case messages.SHOW_ALL_SENT:
+      console.log("userEmail", userEmail);
+      console.log("allEmails", allEmails);
+
       for (const em of allEmails) {
         const isDeletedBySender = em.deletedBySender;
         const isArchived = em.archivedBy.includes(userEmail);
-        if (em.sender === userEmail && !isArchived && !isDeletedBySender) {
+        if (
+          em.sender.email === userEmail &&
+          !isArchived &&
+          !isDeletedBySender
+        ) {
           emails.push(em);
         }
       }
@@ -54,7 +61,7 @@ const filterEmailAccordingToFilterkey = (
     case messages.GLOBAL_SEARCH_QUERY:
       for (const em of allEmails) {
         const isArchived = em.archivedBy.includes(userEmail);
-        if (em.sender.includes(globalQuery) && !isArchived) {
+        if (em.sender.email.includes(globalQuery) && !isArchived) {
           emails.push(em);
         }
       }
@@ -80,18 +87,18 @@ exports.configureUser = async (req, res) => {
     }
 
     const emails = await EMAIL.find({
-      $or: [{ sender: email }, { recipients: email }],
+      $or: [{ "sender.email": email }, { recipients: email }],
     }).populate({
       path: "sender",
       select: "-password -isDarkTheme -createdAT -__v",
     });
 
-    const filteredEmails = filterEmailAccordingToFilterkey(
+    const filteredEmails = filterEmailAccordingToFilterkey({
       emails,
       filterkey,
       email,
-      globalQuery
-    );
+      globalQuery,
+    });
 
     res.status(200).json({
       success: true,
